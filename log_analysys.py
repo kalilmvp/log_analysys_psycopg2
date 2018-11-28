@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import psycopg2
 
 DB_HOST = '127.0.0.1'
