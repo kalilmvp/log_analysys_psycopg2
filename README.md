@@ -1,6 +1,11 @@
 ## Logs Analysis Project for FullStack Developer NanoDegree
 
-### Questions
+This project is intented to execute certain sql scripts at a mock PostgreSQL
+database to display data about a news program. The python script uses *psycopg2* library 
+to query the database and produce a report that answers the following three questions:
+
+
+#### Questions
 1. What are the most popular three articles of all time?
   Which articles have been accessed the most?
   Present this information as a sorted list with the most popular article at the top
@@ -20,50 +25,20 @@
 ```
 pip install -r requirements.txt
 ```
-* Need to create all the views necessary for the software to run
+* Download the Docker image with everything needed to run and create 
+thd database for news schema:
 ```
-create view popular_articles as
-  select art.title as article_title,
-         count(l.path) as access_count
-  from log as l join articles as art on l.path = CONCAT('/article/', art.slug)
-  where l.status = '200 OK'
-  group by art.title order by access_count desc limit 3;
+https://github.com/albertoivo/docker-fullstacknd
 ```
-```
-create view popular_author as
-   select auth.name as author,
-         count(l.path) as page_views
-  from log as l join articles as art on l.path = CONCAT('/article/', art.slug)
-      join authors as auth on auth.id = art.author
-  where l.status = '200 OK'
-  group by auth.name
-   order by page_views desc;
-```
-```
-create view request_errors as
-  SELECT l.time::date, COUNT(*) AS page_views_errors
-  FROM log as l
-  where l.status != '200 OK'
-  GROUP BY l.time::date
-  ORDER BY l.time::date;
-```
-```
-CREATE VIEW page_views_grouped AS
-  SELECT l.time::date, COUNT(*) AS page_views
-  FROM log as l
-  GROUP BY l.time::date
-  ORDER BY l.time::date;
-```
-```
-CREATE VIEW lead_errors_rate AS
-  SELECT pvg.time::date as error_time,
-         ROUND((100.0 * re.page_views_errors / pvg.page_views)::numeric, 2) AS lead_errors
-  FROM page_views_grouped pvg join request_errors re on re.time::date = pvg.time::date
-  ORDER BY pvg.time::date;
+* Need to create all the views necessary for the software to run.
+Just use the file **create_views.sql** at this folder and run with
+the following command at your Postgres console:
+```sql
+psql -d news -f create_views.sql
 ```
 * Run the software
 ```
-py log_analysys.py
+python3 log_analysys.py
 ``` 
 
 

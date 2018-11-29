@@ -7,68 +7,89 @@ DB_NAME = 'news'
 DB_USER = 'vagrant'
 
 
-def connection():
-    return psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER)
+def db_connection():
+    """
+    Creates and returns a connection to the database defined by DB_NAME,
+    as well as a cursor for the database.
+
+    Returns:
+       conn, curs - a tuple.
+        - The first element is a connection to the database.
+        - The second element is a cursor for the database.
+    """
+    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER)
+    # conn = psycopg2.connect(dbname=DB_NAME)
+    return conn, conn.cursor()
 
 
-def cursor(conn):
-    return conn.cursor()
+def exec_query(sql):
+    conn, curs = db_connection()
+
+    curs.execute(sql)
+
+    result = curs.fetchall()
+
+    curs.close()
+    conn.close()
+
+    return result
 
 
-def question_1(conn, curs):
-    curs.execute('select article_title, access_count from popular_articles')
+def question_1():
+    """
+        Output the result of Question 1 for the project.
+        Access the view 'popular_articles' and showcase the
+        'article_title' and 'access_count'.
+    """
 
-    data = curs.fetchall()
+    data = exec_query("""SELECT article_title, access_count
+                        FROM popular_articles""")
 
-    q = """
-Question 1. What are the most popular three articles of all time? Which articles
-have been accessed the most? Present this information as a sorted list with
-the most popular article at the top
-"""
+    print("""1. What are the most popular three articles of all time?""")
 
-    print(q)
     print("-" * 100)
 
     for (article_title, access_count) in data:
-        print("    {} - {}".format(article_title, access_count))
+        print("    {} - {} views".format(article_title, access_count))
 
     print("-" * 100)
 
 
-def question_2(conn, curs):
-    curs.execute('select author, page_views from popular_author')
+def question_2():
+    """
+        Output the result of Question 1 for the project.
+        Access the view 'popular_author' and showcase the
+        'author' and 'page_views'.
+    """
 
-    data = curs.fetchall()
+    data = exec_query("""SELECT author, page_views
+                         FROM popular_author""")
 
-    q = """
-Question 2. Who are the most popular author of all time? That is, when you
-sum up all of the articles each author has written, which authors get
-the most page views? Present this as a sorted list with the most popular
-author at the top.
-"""
+    print("""2. Who are the most popular article authors of all time?""")
 
-    print(q)
     print("-" * 100)
 
     for (author, page_views) in data:
-        print("    {} - {}".format(author, page_views))
+        print("    {} - {} views".format(author, page_views))
 
     print("-" * 100)
 
 
-def question_3(conn, curs):
-    curs.execute('select error_time, lead_errors from lead_errors_rate  where lead_errors > 1')
+def question_3():
+    """
+        Output the result of Question 3 for the project.
+        Access the view 'lead_errors' and showcase the
+        'error_time' and 'lead_errors'.
+    """
 
-    data = curs.fetchall()
+    data = exec_query("""
+        SELECT to_char(error_time, 'Mon DD, YYYY'), lead_errors
+        FROM lead_errors_rate
+        WHERE lead_errors > 1
+        """)
 
-    q = """
-Question 3. On which days did more than 1% of requests lead to errors? The log table includes
-a column status that indicates the HTTP status code that the news site sent to the
-user's browser. (Refer to this lesson for more information about the idea of HTTP
-status codes.)
-"""
+    print("""3. On which days did more than 1% of requests lead to errors?""")
 
-    print(q)
     print("-" * 100)
 
     for (error_time, lead_errors) in data:
@@ -78,17 +99,11 @@ status codes.)
 
 
 def main():
-    conn = connection()
-    curs = cursor(conn)
-
-    question_1(conn, curs)
+    question_1()
     print("*" * 100)
-    question_2(conn, curs)
+    question_2()
     print("*" * 100)
-    question_3(conn, curs)
-
-    curs.close()
-    conn.close()
+    question_3()
 
 
 if __name__ == "__main__":
