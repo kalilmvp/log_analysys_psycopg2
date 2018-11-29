@@ -17,8 +17,8 @@ def db_connection():
         - The first element is a connection to the database.
         - The second element is a cursor for the database.
     """
-    conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER)
-    # conn = psycopg2.connect(dbname=DB_NAME)
+    # conn = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER)
+    conn = psycopg2.connect(dbname=DB_NAME)
     return conn, conn.cursor()
 
 
